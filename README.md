@@ -1,11 +1,8 @@
 # Toy-Robot-Ruby
 I had a think about the toy robot challenge and felt like doing it and keeping it for safe keeping.
 
-In my mind, I thought it worth implementing using the chain of responsibility pattern.
-There is only x number of commands and you can delegate the least likely commands to the end of the chain.
-
-Easy to test as well....
-The basic premise is :
+In my mind, I thought it worth implementing using the command pattern.
+An alternative would be _Chain of Responsibility_ as there is only x number of commands and you can delegate the least likely commands to the end of the chain.
 
 Description:
 
@@ -58,3 +55,5 @@ Output: `0,0,WEST`
 `REPORT`
 Output: `3,3,NORTH`
 
+## Usage
+`ruby toy_robot.rb`

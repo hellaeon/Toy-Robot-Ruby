@@ -1,124 +1,38 @@
-# better name?
-class BaseRobotCommand
+# pattern works nicely and lexically makes sense - I am sending commands to my toy robot!
+# dont know where to put a grid checker?
 
-  # Implements the chain of responsibility pattern. Does not know anything
-  # about the commands themselves, merely whether the current handler
-  # can tell it what to do or whether it must pass it to a successor.
+# Invoker
+require './table'
+require './command_history'
+require './commands/place'
+require './commands/move'
+require './commands/left'
+require './commands/right'
+require './commands/report'
+require './robot'
 
-  attr_reader :successor
-  attr_writer :x, :y
+class RobotCaller
 
-  def initialize successor
-    @successor = successor
+  def initialize (table_x, table_y)
+    @toy_robot = Robot.new
+    @table = Table.new(table_x, table_y)
+    @cmd_history = CommandHistory.new # records the history
   end
 
-  def process_request request
-    raise "not implemented error"
-  end
-
-  def deny_request request
-    puts "Your request for $#{request.amount} needs a board meeting!"
-  end
-
-  def out_of_bounds request
-    @x += request.x
-    @y += request.y
-    return true if @x < 0 || @x > 4
-    return true if @y < 0 || @y > 4
-    false
-  end
-end
-
-class RobotCommand
-  attr_reader :command, :x, :y
-
-  def initialize(command, x, y)
-    @command = command
-    @x = x
-    @y = y
-  end
-end
-
-class Place < BaseRobotCommand
-  def process_request request
-    # if request.amount <= 1000
-    #   puts "Manager will approve $#{request.amount}"
-    # else @successor.process_request request
-    # end
-  end
-end
-
-class Move < BaseRobotCommand
-  def process_request request
-    # if request.amount <= 1000
-    #   puts "Manager will approve $#{request.amount}"
-    # else @successor.process_request request
-    # end
-  end
-end
-
-class Left < BaseRobotCommand
-  def process_request request
-    # if request.amount <= 1000
-    #   puts "Manager will approve $#{request.amount}"
-    # else @successor.process_request request
-    # end
-  end
-end
-
-class Right < BaseRobotCommand
-  def process_request request
-    # if request.amount <= 1000
-    #   puts "Manager will approve $#{request.amount}"
-    # else @successor.process_request request
-    # end
-  end
-end
-
-class Report < BaseRobotCommand
-  def process_request request
-    # if request.amount <= 1000
-    #   puts "Manager will approve $#{request.amount}"
-    # else @successor.process_request request
-    # end
-  end
-end
-
-class ToyRobot
-  def initialize(*commands)
-    commands = build_approvers(commands)
-    @authority = commands.first
-  end
-
-  def process_request request
-    @authority.process_request request
-  end
-
-  private
-
-  def build_commands(command_classes)
-    [].tap do |commands|
-      command_classes.reverse.inject(nil) do |successor, command_class|
-        command_class.new(successor).tap do |command_class|
-          commands.unshift command_class
-        end
-      end
+  def command_for(cmd)
+    case cmd
+      when /PLACE/ then @cmd_history.execute(Place.new(@toy_robot, @table, cmd))
+      when /LEFT/ then @cmd_history.execute(Left.new(@toy_robot))
+      when /RIGHT/  then @cmd_history.execute(Right.new(@toy_robot))
+      when /MOVE/ then @cmd_history.execute(Move.new(@toy_robot, @table))
+      when /REPORT/  then @cmd_history.execute(Report.new(@toy_robot))
+      else puts 'Unsure what yopu want me to do?'
     end
   end
 end
 
-# main program
-# ------------
+robot_caller = RobotCaller.new(5,5)
 
-approvers = CLP.new(Manager, Director, VicePresident, President, CFO)
-
-srand Time.now.to_i
-(1..10).each do |step|
-  $stdout.flush
-  amount = rand(150000)
-  puts
-  puts "Getting Approval for $#{amount}"
-  print ">> "
-  sleep 1
-  approvers.process_request PurchaseRequest.new(0, amount, 'General')
+File.readlines("commands.txt").each do |line|
+  robot_caller.command_for(line)
 end
